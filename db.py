@@ -16,19 +16,6 @@ def create_connection(db_file):
 
    return conn
 
-def create_connection_in_memory():
-   """ create a database connection to a SQLite database """
-   conn = None
-   try:
-       conn = sqlite3.connect(":memory:")
-       print(f"Connected, sqlite version: {sqlite3.version}")
-   except Error as e:
-       print(e)
-   finally:
-       if conn:
-           conn.close()
-
-
 def execute_sql(conn, sql):
    """ Execute sql
    :param conn: Connection object
@@ -172,9 +159,23 @@ def delete_all(conn, table):
    conn.commit()
    print("Deleted")
 
+def create_connection_in_memory():
+   """ create a database connection to a SQLite database """
+   conn = None
+   try:
+       conn = sqlite3.connect(":memory:")
+       print(f"Connected, sqlite version: {sqlite3.version}")
+   except Error as e:
+       print(e)
+   finally:
+       if conn:
+           conn.close()
    
 if __name__ == "__main__":
-    create_projects_sql = """
+   create_connection(r"database.db")
+   create_connection_in_memory()
+
+   create_projects_sql = """
    -- projects table
    CREATE TABLE IF NOT EXISTS projects (
       id integer PRIMARY KEY,
@@ -184,7 +185,7 @@ if __name__ == "__main__":
    );
    """
 
-    create_tasks_sql = """
+   create_tasks_sql = """
    -- zadanie table
    CREATE TABLE IF NOT EXISTS tasks (
       id integer PRIMARY KEY,
@@ -198,66 +199,36 @@ if __name__ == "__main__":
    );
    """
 
-    db_file = "database.db"
+   db_file = "database.db"
 
-    conn = create_connection(db_file)
-    if conn is not None:
+   conn = create_connection(db_file)
+   if conn is not None:
        execute_sql(conn, create_projects_sql)
        execute_sql(conn, create_tasks_sql)
-       conn.close()
 
-    create_connection_in_memory()
-    project = ("Nauka gotowania", "2024-01-04 10:00:00", "2024-01-05 11:00:00")
-    conn = create_connection("database.db")
+   
+   project = ("Programowanie", "2024-01-04 9:00:00", "2024-03-12 00:00:00")
 
-    pr_id = add_project(conn, project)
-    update(conn, "tasks", 2, status="started")
-    update(conn, "tasks", 2, stat="started")
-    conn.close()
-    delete_where(conn, "tasks", id=3)
-    delete_all(conn, "tasks")
+   conn = create_connection("database.db")
+   pr_id = add_project(conn, project)
 
-
-    task = (
-       "6",
-       "Minestore",
-       "Strona 25",
+   task = (
+       pr_id,
+       "Ćw. program.",
+       "Str 24",
        "started",
        "2024-01-04 9:00:00",
-       "2024-01-05 10:50:00"
+       "2024-03-12 00:00:00"
    )
 
-    task_id = add_task(conn, task)
+   task_id = add_task(conn, task)
 
-    print(pr_id, task_id)
-    conn.commit()
+   print(pr_id, task_id)
+   conn.commit()
 
+   update(conn, "tasks", 2, status="started")
+   update(conn, "tasks", 2, stat="started")
     
-    conn = create_connection("database.db")
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM tasks")
-    <sqlite3.Cursor at 0x11088d5e0>
-    rows = cur.fetchall()
-    rows
-    [(1,
-  6,
-  'Czasowniki regularne',
-  'Zapamiętaj czasowniki ze strony 30',
-  'started',
-  '2020-05-11 12:00:00',
-  '2020-05-11 15:00:00'),
- (2,
-  7,
-  'Czasowniki regularne',
-  'Zapamiętaj czasowniki ze strony 30',
-  'started',
-  '2020-05-11 12:00:00',
-  '2020-05-11 15:00:00'),
- (3,
-  8,
-  'Czasowniki regularne',
-  'Zapamiętaj czasowniki ze strony 30',
-  'started',
-  '2020-05-11 12:00:00',
-  '2020-05-11 15:00:00')]
-
+   delete_where(conn, "projects", id=24)
+#  delete_all(conn, "tasks")
+   conn.close()
